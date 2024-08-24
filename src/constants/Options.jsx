@@ -38,13 +38,13 @@ export const SelectBudgetOptions = [
     {
         id: 2,
         title: 'Moderate',
-        desc: 'Keep const on the average side',
+        desc: 'Keep cost on the average side',
         icon: '💸'
     },
     {
         id: 3,
         title: 'Luxury',
-        desc: "Don't worry about const",
+        desc: "Don't worry about cost",
         icon: '💰'
     }
 ]
