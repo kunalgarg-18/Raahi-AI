@@ -23,7 +23,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     
     <Header/>
-    <Toaster/>
+    <Toaster 
+    expand={true}
+    position='top-right'/>
     <RouterProvider router={router}/>
   </StrictMode>,
 )

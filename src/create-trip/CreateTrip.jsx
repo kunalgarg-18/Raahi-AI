@@ -22,6 +22,9 @@ const CreateTrip = () => {
   },[formData])
 
   const onGenerateTrip = () => {
+    if(!formData?.location || !formData?.budget || !formData?.people || !formData?.noOfDays){
+      toast.error("Kindly enter all details.")
+    }
     if(formData?.noOfDays > 10){
       
       toast.error('Number of Days cannot be more than 10.')
@@ -113,7 +116,7 @@ const CreateTrip = () => {
       </div>
 
       <div className="my-10 justify-end flex">
-        <Button onClick={onGenerateTrip()}>
+        <Button onClick={onGenerateTrip}>
           Generate Trip
         </Button>
       </div>
