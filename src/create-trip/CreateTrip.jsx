@@ -16,11 +16,15 @@ import {
 import {FcGoogle} from "react-icons/fc"
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/service/firebaseConfig';
+import {AiOutlineLoading3Quarters} from "react-icons/ai"
 
 const CreateTrip = () => {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState();
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (name, value) => {
     
@@ -55,7 +59,7 @@ const CreateTrip = () => {
       toast.error('Number of Days cannot be more than 10.')
       return;
     }
-
+    setLoading(true);
     const FINAL_PROMPT = AI_PROMPT
     .replace('{location}', formData?.location?.label)
     .replace('{totalDays}', formData?.noOfDays)
@@ -68,6 +72,23 @@ const CreateTrip = () => {
     const result = await chatSession.sendMessage(FINAL_PROMPT)
 
     console.log(result?.response?.text())
+    setLoading(false);
+    saveTrip(result?.response?.text())
+  }
+
+  const saveTrip = async(TripData) => {
+
+    setLoading(true);
+
+    const user = JSON.parse(localStorage.getItem('user'))
+    const docId = Date.now().toString()
+    await setDoc(doc(db, "AITrips", docId), {
+      userSelection: formData,
+      tripData : JSON.parse(TripData),
+      userEmail: user?.email,
+      id: docId
+    });
+    setLoading(false);
   }
 
   const GetUserProfile = (tokenInfo) => {
@@ -167,8 +188,13 @@ const CreateTrip = () => {
       </div>
 
       <div className="my-10 justify-end flex">
-        <Button onClick={onGenerateTrip}>
+        <Button 
+        disabled={loading}
+        onClick={onGenerateTrip}>
+          {loading?<AiOutlineLoading3Quarters className='h-7 w-7 animate-spin'/> :
+              <>
           Generate Trip
+          </>}
         </Button>
       </div>
 
@@ -183,10 +209,13 @@ const CreateTrip = () => {
               <p>Sign in to the App with Google authentication securely.</p>
 
             <Button
+            
              onClick={login}
              className='w-full mt-5 flex gap-4 items-center'>
+              
               <FcGoogle className='h-7 w-7'/>
               Sign In With Google
+              
             </Button>
             </DialogDescription>
           </DialogHeader>
