@@ -12,7 +12,7 @@ const Itinerary = ({trip}) => {
                 <h2 className='font-bold text-lg mt-5'>Day {item.day}</h2>
                 <div className='grid md:grid-cols-2 gap-5'>
                     {item.plan.map((place, index) => (
-                        <div className='my-3'>
+                        <div className='my-3' key={index}>
                             <h2 className='font-medium text-sm text-orange-700'>{place.time}</h2>
                             <ItineraryItem place={place} trip={trip}/>
                             

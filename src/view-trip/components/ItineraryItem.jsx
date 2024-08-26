@@ -1,12 +1,30 @@
-import React from 'react'
+import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalAPI';
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 
 const ItineraryItem = ({place,trip}) => {
+    const [photoUrl, setPhotoUrl] = useState();
+    const GetPlacePhoto = async() => {
+        const data = {
+            textQuery: place?.placeName.toString()
+        }
+        const result = await GetPlaceDetails(data).then(res => {
+            console.log(res.data.places[0].photos[3].name);
+
+            const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', res.data.places[0].photos[3].name)
+            setPhotoUrl(PhotoUrl)
+    
+        })
+    }
+
+    useEffect(() => {
+        place&&GetPlacePhoto()
+    },[place])
   return (
     <Link className='text-black hover:text-black' to={"https://www.google.com/maps/search/?api=1&query="+place.placeName+", "+trip?.userSelection?.location?.label} target='_blank'>
     <div className='border rounded-xl p-2 mt-2 flex gap-5 hover:scale-105 transition-all hover:shadow-md cursor-pointer'>
-      <img src="/placeholder.jpg" className='w-[125px] h-[125px] rounded-xl' alt="" />
+      <img src={photoUrl?photoUrl:'placeholder.jpg'} className='w-[125px] h-[125px] rounded-xl object-cover' alt="" />
       <div>
         <h2 className='font-bold text-lg'>
             {place?.placeName}
