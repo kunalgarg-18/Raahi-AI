@@ -19,12 +19,14 @@ import axios from 'axios';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/service/firebaseConfig';
 import {AiOutlineLoading3Quarters} from "react-icons/ai"
+import { useNavigate } from 'react-router-dom';
 
 const CreateTrip = () => {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState();
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useNavigate();
 
   const handleInputChange = (name, value) => {
     
@@ -89,6 +91,8 @@ const CreateTrip = () => {
       id: docId
     });
     setLoading(false);
+    router('/view-trip/'+docId)
+
   }
 
   const GetUserProfile = (tokenInfo) => {
