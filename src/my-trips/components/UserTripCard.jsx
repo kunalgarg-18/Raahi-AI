@@ -1,4 +1,4 @@
-import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi.jsx';
+import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalAPI';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrashAlt } from "react-icons/fa";
