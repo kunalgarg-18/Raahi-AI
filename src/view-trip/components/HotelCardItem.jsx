@@ -10,9 +10,9 @@ const HotelCardItem = ({item}) => {
             textQuery: item?.hotelName.toString()
         }
         const result = await GetPlaceDetails(data).then(res => {
-            console.log(res.data.places[0].photos[3].name);
+          
 
-            const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', res.data.places[0].photos[3].name)
+            const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', res.data.places[0].photos[2].name)
             setPhotoUrl(PhotoUrl)
     
         })
