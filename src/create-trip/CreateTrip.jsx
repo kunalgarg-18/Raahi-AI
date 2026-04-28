@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AI_PROMPT, SelectBudgetOptions, SelectTravellersList } from '@/constants/Options';
-import { chatSession } from '@/service/AIModel';
-import React, { useEffect, useState } from 'react'
+import { generateTrip } from '@/service/AIModel';
+import React, { useEffect, useState, useCallback } from 'react'
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { toast} from 'sonner';
 import {
@@ -20,10 +20,11 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/service/firebaseConfig';
 import {AiOutlineLoading3Quarters} from "react-icons/ai"
 import { useNavigate } from 'react-router-dom';
+import debounce from 'lodash.debounce';
 
 const CreateTrip = () => {
   const [place, setPlace] = useState();
-  const [formData, setFormData] = useState();
+  const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useNavigate();
@@ -35,6 +36,19 @@ const CreateTrip = () => {
       [name]: value
     })
   }
+  const debouncedOnChange = useCallback(
+    debounce((value) => {
+      setPlace(value);
+      handleInputChange('location', value);
+    }, 1000),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   useEffect(() => {
     console.log(formData)
@@ -55,6 +69,7 @@ const CreateTrip = () => {
     }
     if(!formData?.location || !formData?.budget || !formData?.people || !formData?.noOfDays){
       toast.error("Kindly enter all details.")
+      return;
     }
     if(formData?.noOfDays > 10){
       
@@ -71,11 +86,16 @@ const CreateTrip = () => {
 
     console.log(FINAL_PROMPT)
 
-    const result = await chatSession.sendMessage(FINAL_PROMPT)
-
-    console.log(result?.response?.text())
-    setLoading(false);
-    saveTrip(result?.response?.text())
+    try {
+      const result = await generateTrip(FINAL_PROMPT)
+      console.log(result)
+      setLoading(false);
+      saveTrip(result)
+    } catch (error) {
+      console.error("Error generating trip:", error);
+      toast.error("Failed to generate trip. Please try again.");
+      setLoading(false);
+    }
   }
 
   const saveTrip = async(TripData) => {
@@ -86,7 +106,7 @@ const CreateTrip = () => {
     const docId = Date.now().toString()
     await setDoc(doc(db, "AITrips", docId), {
       userSelection: formData,
-      tripData : JSON.parse(TripData),
+      tripData : TripData,
       userEmail: user?.email,
       id: docId
     });
@@ -127,14 +147,10 @@ const CreateTrip = () => {
             Destination you want to travel?
           </h2>
           <GooglePlacesAutocomplete 
-            
             apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
             selectProps={{
-              place,
-              onChange: (v) => {
-                setPlace(v);
-                handleInputChange('location', v)
-              },
+              value: place, // ✅ correct prop
+              onChange: debouncedOnChange, // ✅ USE THIS
             }}
           />
         </div>
